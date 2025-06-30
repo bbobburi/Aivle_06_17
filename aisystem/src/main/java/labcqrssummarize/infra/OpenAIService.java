@@ -26,7 +26,6 @@ public class OpenAIService {
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
     }
 
-    // 텍스트 요약
     public String summarizeText(String content) {
         System.out.println("🧠 [OpenAIService] 요약 요청 시작");
         Map<String, Object> message = new HashMap<>();
@@ -66,7 +65,6 @@ public class OpenAIService {
         return "";
     }
 
-    // AI 표지 이미지 생성
     public String generateCoverImage(String prompt) {
         System.out.println("🖼️ [OpenAIService] 표지 이미지 생성 요청: " + prompt);
 
@@ -99,7 +97,6 @@ public class OpenAIService {
         return "";
     }
 
-    // 카테고리 추정
     public String estimateCategory(String summary) {
         System.out.println("📚 [OpenAIService] 카테고리 추정 요청");
 
@@ -140,13 +137,12 @@ public class OpenAIService {
         return "Unknown";
     }
 
-    // 가격 산정
     public Integer estimatePrice(String summary) {
         System.out.println("💰 [OpenAIService] 가격 추정 요청");
 
         Map<String, Object> message = new HashMap<>();
         message.put("role", "user");
-        message.put("content", "다음 전자책 줄거리 기반으로 적절한 구독료(한국 원화 단위, 정수) 추천해줘:\n" + summary);
+        message.put("content", "다음 전자책 줄거리 기반으로 적절한 구독료를 '숫자만' 한국 원화로 정수 형태로 추천해줘. 예: 1500\n" + summary);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-4o-mini");
@@ -173,12 +169,13 @@ public class OpenAIService {
                 if (messageResp != null && messageResp.containsKey("content")) {
                     try {
                         String priceStr = ((String) messageResp.get("content")).replaceAll("[^0-9]", "");
-                        int price = Integer.parseInt(priceStr);
-                        System.out.println("✅ [OpenAIService] 추정 가격: " + price);
-                        return price;
+                        if (!priceStr.isEmpty()) {
+                            int price = Integer.parseInt(priceStr);
+                            System.out.println("✅ [OpenAIService] 추정 가격: " + price);
+                            return price;
+                        }
                     } catch (Exception e) {
-                        System.out.println("⚠️ [OpenAIService] 가격 파싱 실패, 기본값 1000 반환");
-                        return 1000;
+                        System.out.println("⚠️ [OpenAIService] 가격 파싱 실패: " + e.getMessage());
                     }
                 }
             }
@@ -187,7 +184,6 @@ public class OpenAIService {
         return 1000;
     }
 
-    // PDF 생성
     public byte[] generateSummaryPdf(String title, String summaryText) throws IOException {
         System.out.println("📄 [OpenAIService] PDF 생성 요청: 제목=" + title);
         byte[] pdfBytes = pdfService.createPdfFromText(title, summaryText);

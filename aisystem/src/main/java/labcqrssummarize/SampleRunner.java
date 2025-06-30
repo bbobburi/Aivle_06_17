@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Component
@@ -50,11 +53,22 @@ public class SampleRunner implements CommandLineRunner {
         ebook.setCoverImage(coverImageUrl);
         System.out.println("✅ 표지 이미지 생성 완료: " + coverImageUrl);
 
-        // 4️⃣ 저장
+        // 4️⃣ PDF 저장
+        try {
+            byte[] pdfBytes = openAIService.generateSummaryPdf(ebook.getTitle(), summary);
+            Path outputPath = Paths.get("output", ebook.getEbookId() + ".pdf");
+            Files.createDirectories(outputPath.getParent());
+            Files.write(outputPath, pdfBytes);
+            System.out.println("✅ PDF 저장 완료: " + outputPath.toAbsolutePath());
+        } catch (Exception e) {
+            System.out.println("❌ PDF 저장 실패: " + e.getMessage());
+        }
+
+        // 5️⃣ 저장
         eBookRepository.save(ebook);
         System.out.println("✅ EBook 저장 완료. ID: " + ebook.getId());
 
-        // 5️⃣ Kafka 발행
+        // 6️⃣ Kafka 발행
         String message = String.format(
             "{ \"type\": \"RequestPublishApproved\", \"ebookId\": \"%s\" }",
             ebook.getEbookId()
