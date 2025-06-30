@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: aisystem
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+
 ---
 
 spring:
@@ -14,31 +19,35 @@ spring:
         show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+
   cloud:
     stream:
       kafka:
         binder:
           brokers: localhost:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          configuration:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.StringSerializer
+            key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
       bindings:
         event-in:
           group: aisystem
-#<<< EDA / Topic Name
           destination: labcqrssummarize
-#>>> EDA / Topic Name
           contentType: application/json
+          consumer:
+            configuration:
+              key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+              value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
         event-out:
-#<<< EDA / Topic Name
           destination: labcqrssummarize
-#>>> EDA / Topic Name
           contentType: application/json
+          producer:
+            configuration:
+              key.serializer: org.apache.kafka.common.serialization.StringSerializer
+              value.serializer: org.apache.kafka.common.serialization.StringSerializer
 
 logging:
   level:
@@ -46,9 +55,8 @@ logging:
     org.springframework.cloud: debug
 
 api:
-  url: 
-    aisystem: localhost:8086 
-    
+  url:
+    aisystem: localhost:8086
 
 server:
   port: 8086
@@ -63,30 +71,36 @@ spring:
         show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+
   cloud:
     stream:
       kafka:
         binder:
           brokers: my-kafka:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          configuration:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.StringSerializer
+            key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
       bindings:
         event-in:
           group: aisystem
           destination: labcqrssummarize
           contentType: application/json
+          consumer:
+            configuration:
+              key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+              value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
         event-out:
           destination: labcqrssummarize
           contentType: application/json
+          producer:
+            configuration:
+              key.serializer: org.apache.kafka.common.serialization.StringSerializer
+              value.serializer: org.apache.kafka.common.serialization.StringSerializer
 
 api:
-  url: 
-    aisystem: aisystem:8080 
-    
-
+  url:
+    aisystem: aisystem:8080

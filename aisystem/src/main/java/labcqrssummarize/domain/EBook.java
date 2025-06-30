@@ -11,6 +11,7 @@ import labcqrssummarize.AisystemApplication;
 import labcqrssummarize.domain.EstimatiedPriceAndCategory;
 import labcqrssummarize.domain.GeneratedEBookCover;
 import labcqrssummarize.domain.SummarizedContent;
+import labcqrssummarize.domain.publicationStatus;
 import lombok.Data;
 
 @Entity
@@ -40,6 +41,7 @@ public class EBook {
 
     private Integer countViews;
 
+    @Enumerated(EnumType.STRING)
     private publicationStatus publicationStatus;
 
     @PostPersist
@@ -50,17 +52,22 @@ public class EBook {
         SummarizedContent summarizedContent = new SummarizedContent(this);
         summarizedContent.publishAfterCommit();
 
-        EstimatiedPriceAndCategory estimatiedPriceAndCategory = new EstimatiedPriceAndCategory(
-            this
-        );
+        EstimatiedPriceAndCategory estimatiedPriceAndCategory = new EstimatiedPriceAndCategory(this);
         estimatiedPriceAndCategory.publishAfterCommit();
     }
 
     public static EBookRepository repository() {
-        EBookRepository eBookRepository = AisystemApplication.applicationContext.getBean(
-            EBookRepository.class
-        );
+        EBookRepository eBookRepository = AisystemApplication.applicationContext.getBean(EBookRepository.class);
         return eBookRepository;
     }
+
+    // ✅ SampleRunner나 외부 호출용 커스텀 setter
+    public void setAuthor(String author) {
+        this.authorId = author;
+    }
+
+    // ✅ SampleRunner나 테스트용 커스텀 getter
+    public String getId() {
+        return this.ebookId;
+    }
 }
-//>>> DDD / Aggregate Root
