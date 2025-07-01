@@ -14,7 +14,6 @@ public class SignedUp extends AbstractEvent {
     private String email;            // 사용 안 함
     private SubscriptionType subscriptionType;
     private MembershipType membershipType;
-    private SubscriptionStatus subscriptionStatus;
 
     public SignedUp() {
         super();
