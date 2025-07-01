@@ -1,0 +1,100 @@
+server:
+  port: 8088
+
+---
+
+spring:
+  profiles: default
+  cloud:
+    gateway:
+#<<< API Gateway / Routes
+      routes:
+        - id: manageauthor
+          uri: http://localhost:8082
+          predicates:
+            - Path=/authors/**, 
+        - id: adminsystem
+          uri: http://localhost:8083
+          predicates:
+            - Path=/authors/**, /eBooks/**, /lookupAuthors/**, /lookupEbooks/**
+        - id: ebookplatform
+          uri: http://localhost:8084
+          predicates:
+            - Path=/eBookPlatforms/**, 
+        - id: subscriber
+          uri: http://localhost:8085
+          predicates:
+            - Path=/subscribers/**, /lookUpMyInfos/**
+        - id: aisystem
+          uri: http://localhost:8086
+          predicates:
+            - Path=/eBooks/**, 
+        - id: pointsystem
+          uri: http://localhost:8087
+          predicates:
+            - Path=/userPoints/**, /lookUpSubscribers/**
+        - id: frontend
+          uri: http://localhost:8080
+          predicates:
+            - Path=/**
+#>>> API Gateway / Routes
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+
+---
+
+spring:
+  profiles: docker
+  cloud:
+    gateway:
+      routes:
+        - id: manageauthor
+          uri: http://manageauthor:8080
+          predicates:
+            - Path=/authors/**, 
+        - id: adminsystem
+          uri: http://adminsystem:8080
+          predicates:
+            - Path=/authors/**, /eBooks/**, 
+        - id: ebookplatform
+          uri: http://ebookplatform:8080
+          predicates:
+            - Path=/eBookPlatforms/**, 
+        - id: subscriber
+          uri: http://subscriber:8080
+          predicates:
+            - Path=/subscribers/**, 
+        - id: aisystem
+          uri: http://aisystem:8080
+          predicates:
+            - Path=/eBooks/**, 
+        - id: pointsystem
+          uri: http://pointsystem:8080
+          predicates:
+            - Path=/userPoints/**, 
+        - id: frontend
+          uri: http://frontend:8080
+          predicates:
+            - Path=/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+server:
+  port: 8080

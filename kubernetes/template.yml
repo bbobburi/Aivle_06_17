@@ -1,0 +1,342 @@
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manageauthor
+  labels:
+    app: manageauthor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manageauthor
+  template:
+    metadata:
+      labels:
+        app: manageauthor
+    spec:
+      containers:
+        - name: manageauthor
+          image: username/manageauthor:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminsystem
+  labels:
+    app: adminsystem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adminsystem
+  template:
+    metadata:
+      labels:
+        app: adminsystem
+    spec:
+      containers:
+        - name: adminsystem
+          image: username/adminsystem:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ebookplatform
+  labels:
+    app: ebookplatform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ebookplatform
+  template:
+    metadata:
+      labels:
+        app: ebookplatform
+    spec:
+      containers:
+        - name: ebookplatform
+          image: username/ebookplatform:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriber
+  labels:
+    app: subscriber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: subscriber
+  template:
+    metadata:
+      labels:
+        app: subscriber
+    spec:
+      containers:
+        - name: subscriber
+          image: username/subscriber:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aisystem
+  labels:
+    app: aisystem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aisystem
+  template:
+    metadata:
+      labels:
+        app: aisystem
+    spec:
+      containers:
+        - name: aisystem
+          image: username/aisystem:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pointsystem
+  labels:
+    app: pointsystem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pointsystem
+  template:
+    metadata:
+      labels:
+        app: pointsystem
+    spec:
+      containers:
+        - name: pointsystem
+          image: username/pointsystem:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: manageauthor
+  labels:
+    app: manageauthor
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: manageauthor
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: adminsystem
+  labels:
+    app: adminsystem
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: adminsystem
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ebookplatform
+  labels:
+    app: ebookplatform
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: ebookplatform
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: subscriber
+  labels:
+    app: subscriber
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: subscriber
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aisystem
+  labels:
+    app: aisystem
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: aisystem
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pointsystem
+  labels:
+    app: pointsystem
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: pointsystem
+
