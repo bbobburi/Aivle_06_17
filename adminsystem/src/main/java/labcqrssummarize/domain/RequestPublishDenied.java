@@ -13,10 +13,13 @@ public class RequestPublishDenied extends AbstractEvent {
 
     private String ebookId;
     private String authorId;
-    private publicationStatus publicationStatus;
+    private PublicationStatus publicationStatus;
 
     public RequestPublishDenied(EBook aggregate) {
         super(aggregate);
+        this.ebookId = aggregate.getEbookId();
+        this.authorId = aggregate.getAuthorId();
+        this.publicationStatus = aggregate.getPublicationStatus();
     }
 
     public RequestPublishDenied() {

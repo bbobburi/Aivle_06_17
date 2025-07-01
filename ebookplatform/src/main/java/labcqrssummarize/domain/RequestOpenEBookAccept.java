@@ -14,4 +14,6 @@ public class RequestOpenEBookAccept extends AbstractEvent {
     private Object viewHistory;
     private Object membershipType;
     private Object subscriptionStatus;
+
+    private String ebookId;
 }

@@ -17,6 +17,9 @@ public class RequestAuthorDenied extends AbstractEvent {
 
     public RequestAuthorDenied(Author aggregate) {
         super(aggregate);
+        this.authorId = aggregate.getAuthorId();
+        this.isApproved = aggregate.getIsApproved();
+        this.userId = aggregate.getUserId();
     }
 
     public RequestAuthorDenied() {

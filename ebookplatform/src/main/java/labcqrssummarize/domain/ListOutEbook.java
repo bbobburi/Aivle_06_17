@@ -12,7 +12,7 @@ import lombok.*;
 public class ListOutEBook extends AbstractEvent {
 
     private Integer pid;
-    private String ebooks;
+    private List<String> ebooks;
 
     public ListOutEBook(EBookPlatform aggregate) {
         super(aggregate);

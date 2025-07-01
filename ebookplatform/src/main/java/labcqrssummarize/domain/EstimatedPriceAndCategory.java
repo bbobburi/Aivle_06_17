@@ -7,7 +7,7 @@ import lombok.*;
 
 @Data
 @ToString
-public class EstimatiedPriceAndCategory extends AbstractEvent {
+public class EstimatedPriceAndCategory extends AbstractEvent {
 
     private String ebookId;
     private String summary;

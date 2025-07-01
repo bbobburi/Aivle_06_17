@@ -12,7 +12,7 @@ import lombok.*;
 public class HandleEBookViewFailed extends AbstractEvent {
 
     private Integer pid;
-    private String ebooks;
+    private List<String> ebooks;
     private Date registeredAt;
     private Integer price;
 

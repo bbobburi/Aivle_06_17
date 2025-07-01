@@ -12,11 +12,15 @@ import lombok.*;
 public class RequestContentDenied extends AbstractEvent {
 
     private String ebookId;
-    private publicationStatus publicationStatus;
+    private PublicationStatus publicationStatus;
     private String authorId;
 
     public RequestContentDenied(EBook aggregate) {
         super(aggregate);
+         // 변경될 속성만 this로 명시적으로 세팅
+        this.ebookId = aggregate.getEbookId();
+        this.authorId = aggregate.getAuthorId();
+        this.publicationStatus = aggregate.getPublicationStatus();
     }
 
     public RequestContentDenied() {

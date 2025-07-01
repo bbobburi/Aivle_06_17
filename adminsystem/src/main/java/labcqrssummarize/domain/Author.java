@@ -1,16 +1,9 @@
 package labcqrssummarize.domain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.*;
-import labcqrssummarize.AdminsystemApplication;
-import labcqrssummarize.domain.RequestAuthorApproved;
-import labcqrssummarize.domain.RequestAuthorDenied;
 import lombok.Data;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Author_table")
@@ -23,28 +16,46 @@ public class Author {
 
     private String name;
 
-    private Boolean isApproved;
+    private Boolean isApproved; // 승인 여부
 
-    private String ebooks;
+    @ElementCollection
+    private List<String> ebooks = new ArrayList<>(); // 해당 작가의 전자책 ID 목록
 
-    private String userId;
+    private String userId; // 플랫폼 사용자 ID
 
-    @PreUpdate
-    public void onPreUpdate() {
-        RequestAuthorApproved requestAuthorApproved = new RequestAuthorApproved(
-            this
-        );
-        requestAuthorApproved.publishAfterCommit();
+    /**
+     * 작가 승인 메서드
+     * 상태 변경 + 이벤트 발행
+     */
+    public void approve() {
+        if (Boolean.TRUE.equals(this.isApproved)) {
+            throw new IllegalStateException("이미 승인된 작가입니다.");
+        }
+        this.isApproved = true;
 
-        RequestAuthorDenied requestAuthorDenied = new RequestAuthorDenied(this);
-        requestAuthorDenied.publishAfterCommit();
+        RequestAuthorApproved event = new RequestAuthorApproved(this);
+        event.publishAfterCommit();
     }
 
-    public static AuthorRepository repository() {
-        AuthorRepository authorRepository = AdminsystemApplication.applicationContext.getBean(
-            AuthorRepository.class
-        );
-        return authorRepository;
+    /**
+     * 작가 거부 메서드
+     * 상태 변경 + 이벤트 발행
+     */
+    public void deny() {
+        if (Boolean.FALSE.equals(this.isApproved)) {
+            throw new IllegalStateException("이미 거부된 작가입니다.");
+        }
+        this.isApproved = false;
+
+        RequestAuthorDenied event = new RequestAuthorDenied(this);
+        event.publishAfterCommit();
+    }
+
+    /**
+     * 전자책 추가 메서드
+     */
+    public void addEbook(String ebookId) {
+        this.ebooks.add(ebookId);
     }
 }
 //>>> DDD / Aggregate Root

@@ -12,7 +12,7 @@ import lombok.*;
 public class ListedUpEBook extends AbstractEvent {
 
     private Integer pid;
-    private String ebooks;
+    private List<String> ebooks;
     private String coverImage;
     private Date registeredAt;
 

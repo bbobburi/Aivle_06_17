@@ -80,5 +80,3 @@ spring:
         event-out:
           destination: labcqrssummarize
           contentType: application/json
-
-

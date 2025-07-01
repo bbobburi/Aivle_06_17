@@ -14,4 +14,6 @@ public class GeneratedEBookCover extends AbstractEvent {
     private String authorId;
     private String coverImage;
     private String content;
+
+    
 }

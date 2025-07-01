@@ -14,54 +14,56 @@ import labcqrssummarize.domain.RequestPublish;
 import labcqrssummarize.domain.RequestPublishCanceled;
 import labcqrssummarize.domain.WrittenContent;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Author_table")
 @Data
-//<<< DDD / Aggregate Root
+@NoArgsConstructor
 public class Author {
 
     @Id
-    private String authorId;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    private String name;
+    private String authorId;     // 작가 식별 ID
+    private String name;         // 작가 이름
+    private Boolean isApproved;  // 관리자 승인 여부
+    private String userId;       // 작가 유저 ID
 
-    private Boolean isApproved;
-
-    private String ebooks;
-
-    private String userId;
-
+    // 작가 등록 이벤트 자동 발행
     @PostPersist
     public void onPostPersist() {
-        RegisteredAuthor registeredAuthor = new RegisteredAuthor(this);
-        registeredAuthor.publishAfterCommit();
-
-        WrittenContent writtenContent = new WrittenContent(this);
-        writtenContent.publishAfterCommit();
-
-        RequestPublish requestPublish = new RequestPublish(this);
-        requestPublish.publishAfterCommit();
+        RegisteredAuthor event = new RegisteredAuthor(this);
+        event.publishAfterCommit();
     }
 
-    @PreUpdate
-    public void onPreUpdate() {
-        ListOutEbookRequested listOutEbookRequested = new ListOutEbookRequested(
-            this
-        );
-        listOutEbookRequested.publishAfterCommit();
-
-        RequestPublishCanceled requestPublishCanceled = new RequestPublishCanceled(
-            this
-        );
-        requestPublishCanceled.publishAfterCommit();
+    // 수동 이벤트 발행 메서드들 (이벤트만 발행하고 DB 저장은 안 함)
+    public void writeContent(String title, String content) {
+        WrittenContent event = new WrittenContent(this);
+        event.setTitle(title);
+        event.setContent(content);
+        event.publishAfterCommit();
     }
 
+    public void requestPublish() {
+        RequestPublish event = new RequestPublish(this);
+        event.publishAfterCommit();
+    }
+
+    public void cancelPublish() {
+        RequestPublishCanceled event = new RequestPublishCanceled(this);
+        event.publishAfterCommit();
+    }
+
+    public void listOutEbook() {
+        ListOutEbookRequested event = new ListOutEbookRequested(this);
+        event.publishAfterCommit();
+    }
+
+    // Repository 접근 (Context 통해 주입받는 방식 그대로 유지)
     public static AuthorRepository repository() {
-        AuthorRepository authorRepository = ManageauthorApplication.applicationContext.getBean(
-            AuthorRepository.class
-        );
-        return authorRepository;
+        return ManageauthorApplication.applicationContext.getBean(AuthorRepository.class);
     }
 }
 //>>> DDD / Aggregate Root
