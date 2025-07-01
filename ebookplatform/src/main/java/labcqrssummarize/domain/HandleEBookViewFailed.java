@@ -30,5 +30,8 @@ public class HandleEBookViewFailed extends AbstractEvent {
         super();
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/aisystem
 //>>> DDD / Domain Event

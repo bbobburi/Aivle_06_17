@@ -1,8 +1,11 @@
 package labcqrssummarize.domain;
 
+<<<<<<< HEAD
 import java.time.LocalDate;
 import java.util.*;
 import labcqrssummarize.domain.*;
+=======
+>>>>>>> feature/aisystem
 import labcqrssummarize.infra.AbstractEvent;
 import lombok.*;
 
@@ -19,6 +22,14 @@ public class GeneratedEBookCover extends AbstractEvent {
 
     public GeneratedEBookCover(EBook aggregate) {
         super(aggregate);
+<<<<<<< HEAD
+=======
+        this.ebookId = aggregate.getEbookId();
+        this.title = aggregate.getTitle();
+        this.authorId = aggregate.getAuthorId();
+        this.coverImage = aggregate.getCoverImage();
+        this.content = aggregate.getContent();
+>>>>>>> feature/aisystem
     }
 
     public GeneratedEBookCover() {

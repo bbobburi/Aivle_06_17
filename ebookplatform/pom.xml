@@ -16,7 +16,11 @@
 
 	<properties>
 		<java.version>11</java.version>
+<<<<<<< HEAD
 		<spring-cloud.version>Hoxton.SR6</spring-cloud.version>
+=======
+		<spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+>>>>>>> feature/aisystem
 		<spring-cloud-stream.version>Germantown.SR1</spring-cloud-stream.version>
 		<cucumber.version>6.8.1</cucumber.version>
 	</properties>
@@ -90,6 +94,7 @@
 			<version>${cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
+<<<<<<< HEAD
 
 		<dependency>
 			<groupId>io.projectreactor</groupId>
@@ -108,6 +113,8 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>5.4.10.Final</version>
 		</dependency>
+=======
+>>>>>>> feature/aisystem
 	</dependencies>
 
 	<dependencyManagement>

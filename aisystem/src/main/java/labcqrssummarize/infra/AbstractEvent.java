@@ -29,21 +29,30 @@ public class AbstractEvent {
     }
 
     public void publish() {
+<<<<<<< HEAD
         /**
          * spring streams 방식
          */
         KafkaProcessor processor = AisystemApplication.applicationContext.getBean(
             KafkaProcessor.class
         );
+=======
+        KafkaProcessor processor = AisystemApplication.applicationContext.getBean(KafkaProcessor.class);
+>>>>>>> feature/aisystem
         MessageChannel outputChannel = processor.outboundTopic();
 
         outputChannel.send(
             MessageBuilder
+<<<<<<< HEAD
                 .withPayload(this)
                 .setHeader(
                     MessageHeaders.CONTENT_TYPE,
                     MimeTypeUtils.APPLICATION_JSON
                 )
+=======
+                .withPayload(this.toJson())  // ✅ JSON 문자열로 변환해서 전송
+                .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
+>>>>>>> feature/aisystem
                 .setHeader("type", getEventType())
                 .build()
         );

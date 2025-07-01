@@ -50,6 +50,7 @@ public class PolicyHandler {
     public void wheneverSummarizedContent_CheckEBookStatus(
         @Payload SummarizedContent summarizedContent
     ) {
+
         System.out.println("##### [SummarizedContent] received: " + summarizedContent);
 
         EBookPlatform ebook = eBookPlatformRepository.findById(
@@ -89,6 +90,7 @@ public class PolicyHandler {
     }
 
     // 전자책 비공개
+
     @StreamListener(
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='ListOutEbookRequested'"
@@ -113,6 +115,7 @@ public class PolicyHandler {
     }
 
     // 전자책 열람 요청 처리 (구독 상태 및 포인트 차감 처리)
+
     @StreamListener(
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='RequestOpenEBookAccept'"
@@ -178,4 +181,5 @@ public class PolicyHandler {
         System.out.println("<< 전자책 열람 실패 처리 >>: " + event + "\n\n");
     }
 }
+
 

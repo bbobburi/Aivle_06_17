@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.*;
 
 import labcqrssummarize.EbookplatformApplication;
+
 import lombok.Data;
 
 @Entity
@@ -26,6 +27,7 @@ public class EBookPlatform {
     private List<String> ebooks = new ArrayList<>();
 
     private LocalDateTime registeredAt;
+
 
     private String coverImage;
 

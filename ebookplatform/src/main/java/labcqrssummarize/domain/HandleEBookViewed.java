@@ -30,6 +30,9 @@ public class HandleEBookViewed extends AbstractEvent {
         super();
     }
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> feature/aisystem
 //>>> DDD / Domain Event

@@ -25,4 +25,3 @@ public class MembershipRequested extends AbstractEvent {
         super();
     }
 }
-

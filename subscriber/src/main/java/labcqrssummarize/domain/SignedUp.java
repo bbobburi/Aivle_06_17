@@ -19,7 +19,6 @@ public class SignedUp extends AbstractEvent {
     private MembershipType membershipType;
     private SubscriptionStatus subscriptionStatus;
     private LocalDateTime startedAt;
-    private LocalDateTime expiredAt;
     private List<ViewHistory> viewHistory;
 
     public SignedUp(Subscriber aggregate) {
@@ -34,12 +33,3 @@ public class SignedUp extends AbstractEvent {
         this.startedAt = aggregate.getStartedAt();
         this.expiredAt = aggregate.getExpiredAt();
         this.viewHistory = aggregate.getViewHistory();
-    }
-
-    public SignedUp() {
-        super();
-    }
-}
-//>>> DDD / Domain Event
-
-

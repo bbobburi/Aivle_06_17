@@ -31,4 +31,3 @@ public class SubscribeRequested extends AbstractEvent {
         super();
     }
 }
-

@@ -11,6 +11,10 @@ import labcqrssummarize.AisystemApplication;
 import labcqrssummarize.domain.EstimatiedPriceAndCategory;
 import labcqrssummarize.domain.GeneratedEBookCover;
 import labcqrssummarize.domain.SummarizedContent;
+<<<<<<< HEAD
+=======
+import labcqrssummarize.domain.publicationStatus;
+>>>>>>> feature/aisystem
 import lombok.Data;
 
 @Entity
@@ -40,6 +44,10 @@ public class EBook {
 
     private Integer countViews;
 
+<<<<<<< HEAD
+=======
+    @Enumerated(EnumType.STRING)
+>>>>>>> feature/aisystem
     private publicationStatus publicationStatus;
 
     @PostPersist
@@ -50,13 +58,18 @@ public class EBook {
         SummarizedContent summarizedContent = new SummarizedContent(this);
         summarizedContent.publishAfterCommit();
 
+<<<<<<< HEAD
         EstimatiedPriceAndCategory estimatiedPriceAndCategory = new EstimatiedPriceAndCategory(
             this
         );
+=======
+        EstimatiedPriceAndCategory estimatiedPriceAndCategory = new EstimatiedPriceAndCategory(this);
+>>>>>>> feature/aisystem
         estimatiedPriceAndCategory.publishAfterCommit();
     }
 
     public static EBookRepository repository() {
+<<<<<<< HEAD
         EBookRepository eBookRepository = AisystemApplication.applicationContext.getBean(
             EBookRepository.class
         );
@@ -64,3 +77,19 @@ public class EBook {
     }
 }
 //>>> DDD / Aggregate Root
+=======
+        EBookRepository eBookRepository = AisystemApplication.applicationContext.getBean(EBookRepository.class);
+        return eBookRepository;
+    }
+
+    // ✅ SampleRunner나 외부 호출용 커스텀 setter
+    public void setAuthor(String author) {
+        this.authorId = author;
+    }
+
+    // ✅ SampleRunner나 테스트용 커스텀 getter
+    public String getId() {
+        return this.ebookId;
+    }
+}
+>>>>>>> feature/aisystem

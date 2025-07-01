@@ -17,7 +17,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface UserPointRepository
     extends PagingAndSortingRepository<UserPoint, String> {
     
-    Optional<UserPoint> findByUserId(String userId);
 }
 
 
