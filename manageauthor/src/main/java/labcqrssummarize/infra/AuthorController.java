@@ -16,122 +16,78 @@ import org.springframework.http.*;
 //<<< Clean Arch / Inbound Adaptor
 
 @RestController
-@RequestMapping(value = "/authors")
+@RequestMapping("/authors")
 @Transactional
 public class AuthorController {
 
-    // 요청 본문(JSON)으로 받을 DTO 클래스
+    @Autowired
+    AuthorRepository authorRepository;
+
+    // ===== DTO 클래스들 =====
+
     @Data
     @NoArgsConstructor
-    static class RegisterAuthorRequest { // 작가 등록 요청 DTO
+    static class RegisterAuthorRequest {
         private String name;
         private String userId;
-        private String ebooks;
     }
 
     @Data
     @NoArgsConstructor
     static class WriteContentRequest {
-        private String authorId;
+        private String title;
         private String content;
     }
 
-    @Data
-    @NoArgsConstructor
-    static class RequestPublishRequest {
-        private String authorId;
-        private Long ebookId;
-        private Boolean isApproved;
-    }
+    // ===== API 메서드들 =====
 
-    @Data
-    @NoArgsConstructor
-    static class CancelPublishRequest {
-        private String authorId;
-    }
-
-    @Autowired
-    AuthorRepository authorRepository;
-    EbookRepository ebookRepository;
-
-    @PostMapping("/authors")
+    // 1. 작가 등록
+    @PostMapping
     public ResponseEntity<Void> registerAuthor(@RequestBody RegisterAuthorRequest request) {
-        // 1. Author 도메인 객체 생성
         Author author = new Author();
         author.setName(request.getName());
         author.setUserId(request.getUserId());
-        author.setEbooks(request.getEbooks());
-        author.setIsApproved(false); // 초기엔 미승인 상태
-
-        // 2. DB 저장
-        authorRepository.save(author);
-
-        // 3. 이벤트 발행
-        RegisteredAuthor event = new RegisteredAuthor(author);
-        event.publish(); // kafka 발행
-
+        author.setIsApproved(false);
+        authorRepository.save(author); // 등록 시 @PostPersist로 RegisteredAuthor 발행
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/write-content")
-    public ResponseEntity<Void> writeContent(@RequestBody WriteContentRequest request) {
-        // 1. Author 조회
-        Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("해당 작가를 찾을 수 없습니다."));
-
-        // 2. 콘텐츠 작성 이벤트 생성 및 발행
-        WrittenContent event = new WrittenContent();
-        event.setAuthorId(author.getAuthorId());
-        event.setContent(request.getContent());
-
-        event.publish();
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/request-publish")
-    public ResponseEntity<Void> requestPublish(@RequestBody RequestPublishRequest request) {
-
-        Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("해당 작가를 찾을 수 없습니다."));
-
-        Ebook ebook = ebookRepository.findById(request.getEbookId())
-                .orElseThrow(() -> new RuntimeException("해당 전자책을 찾을 수 없습니다."));
-
-        RequestPublish event = new RequestPublish(ebook);
-
-        event.setAuthorId(author.getAuthorId());
-        event.setIsApproved(author.getIsApproved());
-
-        event.publish();
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/cancel-publish")
-    public ResponseEntity<Void> cancelPublish(@RequestBody CancelPublishRequest request) {
-        Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("해당 작가를 찾을 수 없습니다."));
-
-        RequestPublishCanceled event = new RequestPublishCanceled(author);
-        event.setAuthorId(author.getAuthorId());
-        event.setIsApproved(author.getIsApproved());
-
-        event.publish();
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/hide-ebook")
-    public ResponseEntity<Void> hideEbook(@RequestParam String authorId) {
-        // 1. Author 조회
+    // 2. 콘텐츠 작성
+    @PostMapping("/{authorId}/write-content")
+    public ResponseEntity<Void> writeContent(
+            @PathVariable Long authorId,
+            @RequestBody WriteContentRequest request
+    ) {
         Author author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 작가가 없습니다: " + authorId));
+                .orElseThrow(() -> new RuntimeException("작가를 찾을 수 없습니다."));
+        author.writeContent(request.getTitle(), request.getContent());
+        return ResponseEntity.ok().build();
+    }
 
-        // 2. 이벤트 객체 생성 및 발행
-        ListOutEbookRequested event = new ListOutEbookRequested(author);
-        event.publish();
+    // 3. 출간 요청
+    @PostMapping("/{authorId}/request-publish")
+    public ResponseEntity<Void> requestPublish(@PathVariable Long authorId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new RuntimeException("작가를 찾을 수 없습니다."));
+        author.requestPublish();
+        return ResponseEntity.ok().build();
+    }
 
+    // 4. 출간 취소
+    @PatchMapping("/{authorId}/cancel-publish")
+    public ResponseEntity<Void> cancelPublish(@PathVariable Long authorId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new RuntimeException("작가를 찾을 수 없습니다."));
+        author.cancelPublish();
+        return ResponseEntity.ok().build();
+    }
+
+    // 5. 전자책 비공개
+    @PatchMapping("/{authorId}/list-out")
+    public ResponseEntity<Void> listOut(@PathVariable Long authorId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new RuntimeException("작가를 찾을 수 없습니다."));
+        author.listOutEbook();
         return ResponseEntity.ok().build();
     }
 }

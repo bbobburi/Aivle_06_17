@@ -12,15 +12,9 @@ import lombok.*;
 public class RequestPublishCanceled extends AbstractEvent {
 
     private Long id;
-    private String authorId;
-    private Boolean isApproved;
-    private Long ebookId;
 
     public RequestPublishCanceled(Author aggregate) {
         super(aggregate);
-        this.id = aggregate.getId();
-        this.authorId = aggregate.getAuthorId();
-        this.isApproved = aggregate.getIsApproved();
     }
 
     public RequestPublishCanceled() {
