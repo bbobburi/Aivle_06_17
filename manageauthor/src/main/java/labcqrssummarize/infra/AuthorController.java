@@ -42,7 +42,7 @@ public class AuthorController {
     // ===== API 메서드들 =====
 
     // 1. 작가 등록
-    @PostMapping
+    @PostMapping // 신규 작가를 등록하는 API이기 떄문에 authorId가 아직 없음(DB에 저장되기 전) 그래서 경로 없음
     public ResponseEntity<Void> registerAuthor(@RequestBody RegisterAuthorRequest request) {
         Author author = new Author();
         author.setName(request.getName());
