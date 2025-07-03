@@ -15,8 +15,8 @@ import org.springframework.util.MimeTypeUtils;
 //<<< Clean Arch / Outbound Adaptor
 public class AbstractEvent {
 
-    String eventType;
-    Long timestamp;
+    private String eventType;
+    private Long timestamp;
 
     public AbstractEvent(Object aggregate) {
         this();
@@ -24,26 +24,18 @@ public class AbstractEvent {
     }
 
     public AbstractEvent() {
-        this.setEventType(this.getClass().getSimpleName());
+        this.eventType = this.getClass().getSimpleName();
         this.timestamp = System.currentTimeMillis();
     }
 
     public void publish() {
-        /**
-         * spring streams 방식
-         */
-        KafkaProcessor processor = AisystemApplication.applicationContext.getBean(
-            KafkaProcessor.class
-        );
+        KafkaProcessor processor = AisystemApplication.applicationContext.getBean(KafkaProcessor.class);
         MessageChannel outputChannel = processor.outboundTopic();
 
         outputChannel.send(
             MessageBuilder
-                .withPayload(this)
-                .setHeader(
-                    MessageHeaders.CONTENT_TYPE,
-                    MimeTypeUtils.APPLICATION_JSON
-                )
+                .withPayload(this.toJson())  // ✅ JSON 문자열로 전송
+                .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
                 .setHeader("type", getEventType())
                 .build()
         );
@@ -81,16 +73,13 @@ public class AbstractEvent {
     }
 
     public String toJson() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = null;
-
         try {
-            json = objectMapper.writeValueAsString(this);
+            return new ObjectMapper().writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON format exception", e);
         }
-
-        return json;
     }
 }
+
+
 //>>> Clean Arch / Outbound Adaptor

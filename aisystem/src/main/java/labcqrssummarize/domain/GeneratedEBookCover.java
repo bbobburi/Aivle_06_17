@@ -1,10 +1,9 @@
 package labcqrssummarize.domain;
 
-import java.time.LocalDate;
-import java.util.*;
-import labcqrssummarize.domain.*;
+import labcqrssummarize.domain.EBook;
 import labcqrssummarize.infra.AbstractEvent;
-import lombok.*;
+import lombok.Data;
+import lombok.ToString;
 
 //<<< DDD / Domain Event
 @Data
@@ -19,10 +18,16 @@ public class GeneratedEBookCover extends AbstractEvent {
 
     public GeneratedEBookCover(EBook aggregate) {
         super(aggregate);
+        this.ebookId = aggregate.getEbookId();
+        this.title = aggregate.getTitle();
+        this.authorId = aggregate.getAuthorId();
+        this.coverImage = aggregate.getCoverImage();
+        this.content = aggregate.getContent();
     }
 
     public GeneratedEBookCover() {
         super();
     }
 }
+
 //>>> DDD / Domain Event

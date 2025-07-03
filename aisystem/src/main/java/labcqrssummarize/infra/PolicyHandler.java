@@ -1,43 +1,113 @@
 package labcqrssummarize.infra;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
-import javax.transaction.Transactional;
 import labcqrssummarize.config.kafka.KafkaProcessor;
-import labcqrssummarize.domain.*;
+import labcqrssummarize.domain.EBook;
+import labcqrssummarize.domain.EBookRepository;
+import labcqrssummarize.domain.GeneratedEBookCover;
+import labcqrssummarize.domain.SummarizedContent;
+import labcqrssummarize.domain.EstimatedPriceAndCategory;
+import labcqrssummarize.infra.OpenAIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-//<<< Clean Arch / Inbound Adaptor
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @Service
 @Transactional
 public class PolicyHandler {
 
     @Autowired
-    EBookRepository eBookRepository;
+    private EBookRepository eBookRepository;
+
+    @Autowired
+    private OpenAIService openAIService;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {}
+    public void handleRequestPublishApproved(@Payload String payload) {
+        System.out.println("\n##### [수신] Kafka 메시지 도착: " + payload + "\n");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(payload);
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='RequestPublishApproved'"
-    )
-    public void wheneverRequestPublishApproved_GenerateContentWithAi(
-        @Payload RequestPublishApproved requestPublishApproved
-    ) {
-        RequestPublishApproved event = requestPublishApproved;
-        System.out.println(
-            "\n\n##### listener GenerateContentWithAi : " +
-            requestPublishApproved +
-            "\n\n"
-        );
-        // Sample Logic //
+            if (jsonNode.has("type") && "RequestPublishApproved".equals(jsonNode.get("type").asText())) {
+                String ebookId = jsonNode.get("ebookId").asText();
+                System.out.println("✅ AI 처리 시작: ebookId=" + ebookId + "\n");
 
+                EBook ebook = eBookRepository.findById(ebookId).orElse(null);
+                if (ebook == null) {
+                    System.out.println("❌ EBook not found: " + ebookId);
+                    return;
+                }
+
+                // 1) 전자책 요약
+                System.out.println("▶️ 요약 생성 요청");
+                String summary = openAIService.summarizeText(ebook.getContent());
+                SummarizedContent summaryEvent = new SummarizedContent(ebook);
+                summaryEvent.setSummary(summary);
+                summaryEvent.publishAfterCommit();
+
+                // 2) 표지 이미지 생성
+                System.out.println("▶️ 표지 이미지 생성 요청");
+                String coverImageUrl = openAIService.generateCoverImage(ebook.getTitle());
+                ebook.setCoverImage(coverImageUrl);
+                GeneratedEBookCover coverEvent = new GeneratedEBookCover(ebook);
+                coverEvent.publishAfterCommit();
+
+                // 3) PDF 저장
+                try {
+                    System.out.println("▶️ PDF 생성 시작");
+                    byte[] pdfBytes = openAIService.generateSummaryPdf(ebook.getTitle(), summary);
+                    Path pdfDir = Path.of("pdfs");
+                    if (!Files.exists(pdfDir)) {
+                        Files.createDirectories(pdfDir);
+                    }
+                    Path pdfPath = pdfDir.resolve(ebookId + ".pdf");
+                    try (FileOutputStream fos = new FileOutputStream(pdfPath.toFile())) {
+                        fos.write(pdfBytes);
+                    }
+                    System.out.println("✅ PDF 저장 완료: " + pdfPath.toAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // 4) 카테고리 및 가격 추정
+                System.out.println("▶️ 카테고리 및 가격 추정 시작");
+                String category = openAIService.estimateCategory(summary);
+                Integer price = openAIService.estimatePrice(summary);
+
+                EstimatedPriceAndCategory priceAndCategoryEvent = new EstimatedPriceAndCategory(ebook);
+                priceAndCategoryEvent.setSummary(summary);
+                priceAndCategoryEvent.setCategory(category);
+                priceAndCategoryEvent.setPrice(price);
+                priceAndCategoryEvent.publishAfterCommit();
+
+                // 5) DB 최종 저장
+                ebook.setSummary(summary);
+                ebook.setCategory(category);
+                ebook.setPrice(price);
+                eBookRepository.save(ebook);
+
+                System.out.println("✅ AI 처리 완료: " + ebookId + "\n");
+                // Kafka 비동기 처리 시간 확보
+                Thread.sleep(3000);
+            } else {
+                System.out.println("⚠️ 메시지 타입이 RequestPublishApproved가 아님. 무시됨.");
+            }
+        } catch (Exception e) {
+            System.err.println("❗ Kafka 메시지 처리 실패");
+            e.printStackTrace();
+        }
     }
 }
-//>>> Clean Arch / Inbound Adaptor
+
+
+
+
