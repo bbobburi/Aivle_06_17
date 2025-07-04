@@ -29,14 +29,15 @@ public class PolicyHandler {
     ) {
         System.out.println("##### [GeneratedEBookCover] received: " + generatedEBookCover);
 
-        EBookPlatform ebook = eBookPlatformRepository.findById(
-            Integer.parseInt(generatedEBookCover.getEbookId())
-        ).orElse(null);
-        if (ebook == null) return;
+        EBookPlatform ebook = eBookPlatformRepository.findById(1).orElseGet(() -> {
+        EBookPlatform newPlatform = new EBookPlatform();
+        return eBookPlatformRepository.save(newPlatform);
+    });
         
         ebook.markCoverGenerated();
+
         if (ebook.isReadyForPublish()) {
-            ebook.register();
+            ebook.register(generatedEBookCover.getEbookId());
         }
 
         eBookPlatformRepository.save(ebook);
@@ -52,14 +53,15 @@ public class PolicyHandler {
     ) {
         System.out.println("##### [SummarizedContent] received: " + summarizedContent);
 
-        EBookPlatform ebook = eBookPlatformRepository.findById(
-            Integer.parseInt(summarizedContent.getEbookId())
-        ).orElse(null);
-        if (ebook == null) return;
+        EBookPlatform ebook = eBookPlatformRepository.findById(1).orElseGet(() -> {
+        EBookPlatform newPlatform = new EBookPlatform();
+        return eBookPlatformRepository.save(newPlatform);
+        });
 
         ebook.markContentSummarized();
+
         if (ebook.isReadyForPublish()) {
-            ebook.register();
+            ebook.register(summarizedContent.getEbookId());
         }
 
         eBookPlatformRepository.save(ebook);
@@ -75,43 +77,20 @@ public class PolicyHandler {
     ) {
         System.out.println("##### [EstimatedPriceAndCategory] received: " + estimatedPriceAndCategory);
 
-        EBookPlatform ebook = eBookPlatformRepository.findById(
-            Integer.parseInt(estimatedPriceAndCategory.getEbookId())
-        ).orElse(null);
-        if (ebook == null) return;
+        EBookPlatform ebook = eBookPlatformRepository.findById(1).orElseGet(() -> {
+        EBookPlatform newPlatform = new EBookPlatform();
+        return eBookPlatformRepository.save(newPlatform);
+        });
 
         ebook.markPriceAndCategorySet();
+
         if (ebook.isReadyForPublish()) {
-            ebook.register();
+            ebook.register(estimatedPriceAndCategory.getEbookId());
         }
 
         eBookPlatformRepository.save(ebook);
     }
-/*
-    // 전자책 비공개 -> adminsystem으로 이전
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='ListOutEbookRequested'"
-    )
-    public void wheneverListOutEbookRequested_RequestPrivateStatus(
-        @Payload ListOutEbookRequested listOutEbookRequested
-    ) {
-        System.out.println("##### [ListOutEbookRequested] received: " + listOutEbookRequested);
-
-        Integer ebookId = Integer.parseInt(listOutEbookRequested.getEBookId());
-
-        EBookPlatform ebook = eBookPlatformRepository.findById(ebookId).orElse(null);
-        if (ebook == null) {
-            System.out.println("해당 ID의 전자책이 존재하지 않습니다: " + ebookId);
-            return;
-        }
-
-        ebook.updateStatus(EBookPlatform.EbookStatus.REMOVED);
-        eBookPlatformRepository.save(ebook);
-
-        System.out.println("전자책이 비공개 처리되었습니다. ID: " + ebookId);
-    }
- */
+    /*
     // 전자책 열람 요청 처리 (구독 상태 및 포인트 차감 처리)
     @StreamListener(
         value = KafkaProcessor.INPUT,
@@ -159,7 +138,7 @@ public class PolicyHandler {
 
         // 포인트 차감 성공/실패 이벤트 수신 후 별도 처리 필요
     }
-
+    
     // 전자책 열람 성공 이벤트 수신 로그
     @StreamListener(
         value = KafkaProcessor.INPUT,
@@ -177,5 +156,6 @@ public class PolicyHandler {
     public void wheneverHandleEBookViewFailed_LogFail(@Payload HandleEBookViewFailed event) {
         System.out.println("<< 전자책 열람 실패 처리 >>: " + event + "\n\n");
     }
+    */
 }
 

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
-
+import labcqrssummarize.domain.*;
 import labcqrssummarize.EbookplatformApplication;
 import lombok.Data;
 
@@ -13,28 +13,13 @@ import lombok.Data;
 @Data
 public class EBookPlatform {
 
-    public enum EbookStatus {
-        IN_PROGRESS,    // 출판 준비 중
-        OPEN,           // 출판 준비 완료됨, 열람
-        REMOVED         // 삭제됨
-    }
-
     @Id
-    private Integer pid;
+    private Integer pid = 1;  // 고정값
 
     @ElementCollection
     private List<String> ebooks = new ArrayList<>();
 
     private LocalDateTime registeredAt;
-
-    private String coverImage;
-
-    private String summary;
-
-    private Integer price;  // 단수형으로 변경
-
-    @Enumerated(EnumType.STRING)
-    private EbookStatus status = EbookStatus.IN_PROGRESS;
 
     private boolean coverGenerated = false;
     private boolean contentSummarized = false;
@@ -57,25 +42,29 @@ public class EBookPlatform {
         return coverGenerated && contentSummarized && priceAndCategorySet;
     }
 
-    public void updateStatus(EbookStatus newStatus) {
-        this.status = newStatus;
+    // 얘가 등록 상태 확인해서 올려줌.
+    public void register(String ebookId) {
+    if (!isReadyForPublish()) {
+        throw new IllegalStateException("아직 출판 준비가 완료되지 않았습니다.");
     }
 
-    public void register() {
-        if (!isReadyForPublish()) {
-            throw new IllegalStateException("아직 출판 준비가 완료되지 않았습니다.");
-        }
+    this.registeredAt = LocalDateTime.now();
 
-        this.status = EbookStatus.OPEN;
-        this.registeredAt = LocalDateTime.now();
-
-        ListedUpEBook listedUp = new ListedUpEBook(this);
-        listedUp.publishAfterCommit();
-
-        System.out.println("<< 전자책 등록 완료됨 >>");
+    if (this.ebooks == null) {
+        this.ebooks = new ArrayList<>();
+    }
+    if (!this.ebooks.contains(ebookId)) {
+        this.ebooks.add(ebookId);
     }
 
-    public boolean openEBook(RequestOpenEBookAccept event) {
+    ListedUpEBook listedUp = new ListedUpEBook(this);
+    listedUp.publishAfterCommit();
+
+    System.out.println("<< 전자책 등록 완료됨 >>");
+    }
+
+/* 
+    public boolean openEBook(RequestOpenEBookAccefpt event) {
         if (this.status != EbookStatus.OPEN) {
             HandleEBookViewFailed failEvent = new HandleEBookViewFailed(this);
             failEvent.setUserId(event.getUserId());  // userId 전달
@@ -92,17 +81,5 @@ public class EBookPlatform {
         System.out.println("<< 전자책 열람 성공 >>");
         return true;
     }
-
-    public void listOutEBook(ListOutEBook event) {
-        this.status = EbookStatus.REMOVED;
-
-        ListOutEBook listOutEBook = new ListOutEBook(this);
-        listOutEBook.publishAfterCommit();
-
-        System.out.println("<< 전자책 비공개 처리됨 >>");
-    }
-
-    public static EBookPlatformRepository repository() {
-        return EbookplatformApplication.applicationContext.getBean(EBookPlatformRepository.class);
-    }
+*/
 }
